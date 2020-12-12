@@ -1,0 +1,8 @@
+/mta_archives/
+/node_modules/
+/resources/
+
+# auto generated wildcard
+uimodule/.env1
+# auto generated wildcard
+uimodule/.env2

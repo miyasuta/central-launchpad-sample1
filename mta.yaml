@@ -1,0 +1,81 @@
+_schema-version: "3.2"
+ID: sample1
+version: 0.0.1
+modules:
+- name: sample1-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: uaa_sample1
+    parameters:
+      service-key:
+        name: uaa_sample1-key
+  - name: sample1_html_repo_host
+    parameters:
+      service-key:
+        name: sample1_html_repo_host-key
+  - name: sample1-destination-service
+    parameters:
+      content-target: true
+  parameters:
+    content:
+      subaccount:
+        destinations:
+        - Name: sample1a_sample1_html_repo_host
+          ServiceInstanceName: sample1-html5-app-host-service
+          ServiceKeyName: sample1_html_repo_host-key
+          sap.cloud.service: sample1a
+        - Authentication: OAuth2UserTokenExchange
+          Name: sample1a_uaa_sample1
+          ServiceInstanceName: sample1-xsuaa-service
+          ServiceKeyName: uaa_sample1-key
+          sap.cloud.service: sample1a
+        existing_destinations_policy: update
+  build-parameters:
+    no-source: true
+- name: sample1_ui_deployer
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: sample1_html_repo_host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - uimodule-content.zip
+      name: uimodule
+      target-path: resources/
+- name: uimodule
+  type: html5
+  path: uimodule
+  build-parameters:
+    builder: custom
+    commands:
+    - npm run build
+    supported-platforms: []
+resources:
+- name: sample1-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: destination
+    service-name: sample1-destination-service
+    service-plan: lite
+- name: sample1_html_repo_host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: sample1-html5-app-host-service
+    service-plan: app-host
+- name: uaa_sample1
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: sample1-xsuaa-service
+    service-plan: application
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npm install
